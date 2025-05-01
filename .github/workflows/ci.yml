@@ -1,0 +1,131 @@
+name: CI/CD Pipeline
+
+on:
+  push:
+    branches: ['main']
+  pull_request:
+    branches: ['main']
+
+jobs:
+  build:
+    name: Lint, Analyse, Package
+    runs-on: ubuntu-latest
+
+    steps:
+      # 1. Récupération du code source
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0  # Nécessaire pour SonarCloud pour voir tous les commits
+
+      # 2. Installation de Node.js
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '18'
+          cache: 'npm'
+
+      # 3. Installation des dépendances npm
+      - name: Install dependencies
+        run: npm ci || npm install
+
+      # 4. Configuration ESLint (s'il n'existe pas déjà)
+      - name: Create ESLint configuration if needed
+        run: |
+          if [ ! -f .eslintrc.json ]; then
+            echo '{
+              "env": {
+                "node": true,
+                "es2021": true
+              },
+              "extends": "eslint:recommended",
+              "parserOptions": {
+                "ecmaVersion": "latest",
+                "sourceType": "module"
+              },
+              "rules": {
+                "no-unused-vars": "warn",
+                "no-console": "off"
+              }
+            }' > .eslintrc.json
+            
+            # Ajout de eslint dans les dépendances si nécessaire
+            if ! grep -q "eslint" package.json; then
+              npm install --save-dev eslint
+            fi
+            
+            # Ajout du script lint si nécessaire
+            if ! grep -q "\"lint\":" package.json; then
+              # Utilisation de jq si disponible
+              if command -v jq >/dev/null 2>&1; then
+                jq '.scripts.lint = "eslint ."' package.json > tmp.json && mv tmp.json package.json
+              else
+                echo "Consider adding a lint script to package.json: \"lint\": \"eslint .\""
+              fi
+            fi
+          fi
+
+      # 5. Linting du code avec ESLint
+      - name: ESLint
+        run: npx eslint . || echo "ESLint issues found, but continuing"
+
+      # 6. Analyse statique avec SonarCloud
+      - name: SonarCloud Scan
+        uses: SonarSource/sonarcloud-github-action@v2.1.1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+        with:
+          args: >
+            -Dsonar.organization=sylvainmjc
+            -Dsonar.projectKey=SylvainMJC_ci-mod-steam
+            -Dsonar.sources=.
+            -Dsonar.javascript.lcov.reportPaths=coverage/lcov.info
+
+      # 7. Scan de sécurité avec Trivy
+      - name: Security scan with Trivy
+        uses: aquasecurity/trivy-action@master
+        with:
+          scan-type: 'fs'
+          scan-ref: '.'
+          ignore-unfixed: true
+          vuln-type: 'os,library'
+          severity: 'CRITICAL,HIGH'
+          format: 'table'
+
+      # 8. Packaging npm
+      - name: Pack npm package
+        run: npm pack
+
+      # 9. Upload du package npm comme artefact
+      - name: Upload npm package as artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: npm-package
+          path: '*.tgz'
+
+      # 10. Construction et déploiement Docker (si Dockerfile existe)
+      - name: Check if Dockerfile exists
+        id: check_dockerfile
+        run: |
+          if [ -f "Dockerfile" ]; then
+            echo "dockerfile_exists=true" >> $GITHUB_OUTPUT
+          else
+            echo "dockerfile_exists=false" >> $GITHUB_OUTPUT
+          fi
+
+      - name: Log in to GitHub Container Registry
+        if: steps.check_dockerfile.outputs.dockerfile_exists == 'true' && github.event_name != 'pull_request'
+        uses: docker/login-action@v3
+        with:
+          registry: ghcr.io
+          username: ${{ github.repository_owner }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Build and push Docker image
+        if: steps.check_dockerfile.outputs.dockerfile_exists == 'true' && github.event_name != 'pull_request'
+        uses: docker/build-push-action@v5
+        with:
+          context: .
+          push: true
+          tags: ghcr.io/${{ github.repository }}:latest,ghcr.io/${{ github.repository }}:${{ github.sha }} 

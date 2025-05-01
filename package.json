@@ -1,0 +1,25 @@
+{
+  "name": "steam-workshop-tools",
+  "version": "1.0.0",
+  "description": "Outils pour interagir avec le Steam Workshop",
+  "main": "fetchCreatorMods.js",
+  "scripts": {
+    "lint": "eslint .",
+    "start": "node fetchCreatorMods.js",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [
+    "steam",
+    "workshop",
+    "mods",
+    "project-zomboid"
+  ],
+  "author": "",
+  "license": "MIT",
+  "dependencies": {
+    "https": "^1.0.0"
+  },
+  "devDependencies": {
+    "eslint": "^8.51.0"
+  }
+} 
