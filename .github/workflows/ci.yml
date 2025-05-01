@@ -122,10 +122,17 @@ jobs:
           username: ${{ github.repository_owner }}
           password: ${{ secrets.GITHUB_TOKEN }}
 
+      - name: Prepare Docker metadata
+        if: steps.check_dockerfile.outputs.dockerfile_exists == 'true' && github.event_name != 'pull_request'
+        id: docker_meta
+        run: |
+          REPO_LOWERCASE=$(echo "${{ github.repository }}" | tr '[:upper:]' '[:lower:]')
+          echo "repository_lowercase=$REPO_LOWERCASE" >> $GITHUB_OUTPUT
+
       - name: Build and push Docker image
         if: steps.check_dockerfile.outputs.dockerfile_exists == 'true' && github.event_name != 'pull_request'
         uses: docker/build-push-action@v5
         with:
           context: .
           push: true
-          tags: ghcr.io/${{ github.repository }}:latest,ghcr.io/${{ github.repository }}:${{ github.sha }} 
+          tags: ghcr.io/${{ steps.docker_meta.outputs.repository_lowercase }}:latest,ghcr.io/${{ steps.docker_meta.outputs.repository_lowercase }}:${{ github.sha }} 

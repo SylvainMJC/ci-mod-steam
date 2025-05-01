@@ -19,7 +19,7 @@ COPY . .
 VOLUME [ "/app/output" ]
 
 # Définition d'une variable d'environnement pour le script à exécuter
-ENV APP_SCRIPT=fetchCreatorMods.js
+ENV APP_SCRIPT=getUserSummary.js
 
 # Commande par défaut lors du lancement du conteneur
 CMD ["sh", "-c", "node ${APP_SCRIPT}"] 
