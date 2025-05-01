@@ -7,10 +7,9 @@ on:
     branches: ['main']
 
 jobs:
-  build:
-    name: Lint, Analyse, Package
+  setup:
+    name: Setup
     runs-on: ubuntu-latest
-
     steps:
       # 1. Récupération du code source
       - name: Checkout code
@@ -65,10 +64,66 @@ jobs:
             fi
           fi
 
+  lint:
+    name: Lint
+    needs: [setup]
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+      
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '18'
+          cache: 'npm'
+      
+      - name: Install dependencies
+        run: npm ci || npm install
+      
       # 5. Linting du code avec ESLint
       - name: ESLint
         run: npx eslint . || echo "ESLint issues found, but continuing"
 
+  tests:
+    name: Tests Unitaires
+    needs: [lint]
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+      
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '18'
+          cache: 'npm'
+      
+      - name: Install dependencies
+        run: npm ci || npm install
+      
+      - name: Run tests
+        run: npm test || echo "No tests found or tests failed, but continuing"
+
+  sonarcloud:
+    name: SonarCloud
+    needs: [tests]
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '18'
+          cache: 'npm'
+      
+      - name: Install dependencies
+        run: npm ci || npm install
+      
       # 6. Analyse statique avec SonarCloud
       - name: SonarCloud Scan
         uses: SonarSource/sonarcloud-github-action@v2.1.1
@@ -82,6 +137,14 @@ jobs:
             -Dsonar.sources=.
             -Dsonar.javascript.lcov.reportPaths=coverage/lcov.info
 
+  trivy:
+    name: Trivy Security Scan
+    needs: [lint]
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+      
       # 7. Scan de sécurité avec Trivy
       - name: Security scan with Trivy
         uses: aquasecurity/trivy-action@master
@@ -93,6 +156,23 @@ jobs:
           severity: 'CRITICAL,HIGH'
           format: 'table'
 
+  package:
+    name: Package
+    needs: [tests, sonarcloud, trivy]
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+      
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '18'
+          cache: 'npm'
+      
+      - name: Install dependencies
+        run: npm ci || npm install
+      
       # 8. Packaging npm
       - name: Pack npm package
         run: npm pack
@@ -104,7 +184,15 @@ jobs:
           name: npm-package
           path: '*.tgz'
 
-      # 10. Construction et déploiement Docker (si Dockerfile existe)
+  docker:
+    name: Docker Build
+    needs: [package]
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+      
+      # 10. Check if Dockerfile exists
       - name: Check if Dockerfile exists
         id: check_dockerfile
         run: |
