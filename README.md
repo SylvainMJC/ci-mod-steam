@@ -11,6 +11,8 @@ Outils pour interagir avec le Steam Workshop, permettant de récupérer des info
 
 ## Installation
 
+### Installation traditionnelle
+
 ```bash
 # Cloner le dépôt
 git clone https://github.com/yourusername/steam-workshop-tools.git
@@ -20,14 +22,53 @@ cd steam-workshop-tools
 npm install
 ```
 
-## Utilisation
-
-### Récupérer les mods d'un créateur
+### Installation avec Docker
 
 ```bash
+# Cloner le dépôt
+git clone https://github.com/yourusername/steam-workshop-tools.git
+cd steam-workshop-tools
+
+# Construire l'image Docker
+docker-compose build
+# ou
+./run.sh build  # Linux/macOS
+run.bat build   # Windows
+```
+
+## Utilisation
+
+### Utilisation traditionnelle
+
+```bash
+# Récupérer les mods d'un créateur
 # Modifier la variable CREATOR_ID dans fetchCreatorMods.js si nécessaire
 npm start
+
+# Trouver votre Creator ID
+node getCreatorId.js
+
+# Récupérer le résumé d'un utilisateur
+node getUserSummary.js
 ```
+
+### Utilisation avec Docker
+
+```bash
+# Utiliser les scripts d'aide
+./run.sh fetch    # Exécuter fetchCreatorMods.js (Linux/macOS)
+./run.sh creator  # Exécuter getCreatorId.js (Linux/macOS)
+./run.sh user     # Exécuter getUserSummary.js (Linux/macOS)
+
+run.bat fetch     # Exécuter fetchCreatorMods.js (Windows)
+run.bat creator   # Exécuter getCreatorId.js (Windows)
+run.bat user      # Exécuter getUserSummary.js (Windows)
+
+# Ou utiliser docker-compose directement
+docker-compose run --rm -e APP_SCRIPT=fetchCreatorMods.js steam-workshop-tools
+```
+
+Les fichiers de sortie (JSON et logs) seront stockés dans le dossier `output/` du répertoire courant.
 
 ## Pipeline CI/CD
 

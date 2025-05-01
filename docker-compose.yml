@@ -1,0 +1,15 @@
+version: '3.8'
+
+services:
+  steam-workshop-tools:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: steam-workshop-tools
+    volumes:
+      - ./output:/app/output
+    environment:
+      - APP_SCRIPT=getUserSummary.js
+    stdin_open: true 
+    tty: true
+    restart: "no"
