@@ -2,10 +2,11 @@
   "name": "steam-workshop-tools",
   "version": "1.0.0",
   "description": "Outils pour interagir avec le Steam Workshop",
-  "main": "fetchCreatorMods.js",
+  "type": "module",
+  "main": "getUserSummary.js",
   "scripts": {
     "lint": "eslint .",
-    "start": "node fetchCreatorMods.js",
+    "start": "node getUserSummary.js",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "keywords": [
@@ -17,9 +18,10 @@
   "author": "",
   "license": "MIT",
   "dependencies": {
-    "https": "^1.0.0"
+    "https": "^1.0.0",
+    "steamapi": "^3.1.1"
   },
   "devDependencies": {
     "eslint": "^8.51.0"
   }
-} 
+}
