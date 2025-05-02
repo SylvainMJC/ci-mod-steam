@@ -72,6 +72,10 @@ Pour notre projet JavaScript, ESLint nous permet d'appliquer des règle de style
 
 L'étape des tests unitaires vérifie que chaque composant fonctionne comme prévu. Elle s'enchaîne logiquement après l'étape de lint, puisqu'il est plus efficace de tester du code déjà validé syntaxiquement. Notre configuration exécute la commande de test standard de npm, qui lance tous nos tests unitaires. Comme pour le linting, nous avons choisi une approche qui permet de continuer le pipeline même en cas d'échec partiel des tests ou d'absence de tests pour certaines parties du code. Cette flexibilité est particulièrement utile durant les phases initiales du développement, où tous les composants ne sont pas encore couverts par des tests complets.
 
+Pour notre projet, nous avons implémenté des tests unitaires avec Jest, couvrant principalement deux aspects :
+- Des tests pour les fonctions utilitaires (mathématiques et manipulation de chaînes)
+- Des tests simulant les interactions avec l'API Steam à l'aide de mocks
+
 Pour un projet qui interagit avec une API externe comme Steam Workshop, les tests sont essentiels. Ils nous permettent de simuler différentes réponses de l'API et de vérifier que notre code les gère correctement, même dans des cas limites qui seraient difficiles à reproduire manuellement.
 
 ### 4. SonarCloud
