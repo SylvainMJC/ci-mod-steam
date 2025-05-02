@@ -1,7 +1,7 @@
 describe('Steam API', () => {
   test('Vérification de la structure de l\'API Steam', () => {
     const mockSteamAPI = {
-      getUserSummary: (steamId) => {
+      getUserSummary: () => {
         return Promise.resolve({
           steamid: '76561198041411600',
           personaname: 'TestUser',
