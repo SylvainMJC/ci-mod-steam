@@ -50,9 +50,11 @@ Notre pipeline comprend les étapes suivantes :
 6. **Package** - Création du package npm
 7. **Docker** - Construction et publication de l'image Docker
 
+![Schéma des jobs de la pipeline CI/CD](./images/schema-ci.png)
+
 Cette architecture en pipeline séquentiel nous permet de détecter les problèmes le plus tôt possible dans le cycle de développement, selon le principe "fail fast".
 
-![Architecture du pipeline CI/CD](https://mermaid.ink/img/pako:eNp1kk1OwzAQha8yapYgsUjiNklLN-2SlQsSQoqMyeQHxY5kOwIqyl2YFZfAHMRRW1QQEStLM--bN88jn6mwCmlE27aDPXJDShQcNxYaQ5A6gYA9aGk2Nl_SjOIZ2sZBhTAFG6yHrMRHCcHRWJgphVkB9QccHK80E0IBV8WcYXxnbdNJK8yEo-DiDGQxaGR-qTwXrtbS2sVq4xqtfC1Uy0vXSOMqe47yRV6W0-l1KF3T7T-b7K7XL6znYN44N50lJMtDtIQNQ6GNw8xfR1WTQ-e9oG3x4sF49RgmzvGvjK0fJzhjZbFSVNyDZbh3Vf_Bs49REXKr-FnZbpQN1oPl_QrfuG-HGofPmxjDC7Z_DvTzIuV8Ry6r_0L8KsdwLHEBtAr2G6ULLCZfkH_mG-kDdAanb2YaFB-kw4xNb8_9x4M5p1E_p1FIIzfR3gvxHu3oV0hbtIvw1FJTrdZu1cN-lbVvqW1oZA__)
+
 
 ## Détail des étapes du pipeline
 
