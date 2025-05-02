@@ -1,15 +1,11 @@
-# Dossiers
 node_modules
 .git
 .github
 
-# Fichiers de logs
 *.log
 
-# Fichiers de sortie JSON (ils seront persistés dans le volume)
 creator-*.json
 
-# Autres fichiers
 .DS_Store
 .gitignore
 README.md
